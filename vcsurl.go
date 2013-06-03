@@ -66,19 +66,22 @@ func Parse(spec string) (info *RepoInfo, err error) {
 		path := parsedURL.Path
 		switch info.RepoHost {
 		case Github:
-			path = removeDotGit.ReplaceAllLiteralString(path, "")
 			parts := strings.Split(path, "/")
-			if len(parts) == 3 {
+			if len(parts) >= 3 {
 				info.Username = parts[1]
+				parts[2] = removeDotGit.ReplaceAllLiteralString(parts[2], "")
 				info.Name = parts[2]
 				info.FullName = parts[1] + "/" + parts[2]
 				info.CloneURL = "git://github.com/" + info.FullName + ".git"
 			}
 		case GoogleCode:
-			prefix := "/p/"
-			if strings.HasPrefix(path, prefix) {
-				info.Name = path[len(prefix):]
-				info.FullName = info.Name
+			parts := strings.Split(path, "/")
+			if len(parts) >= 3 {
+				if parts[1] == "p" {
+					info.Name = parts[2]
+					info.FullName = info.Name
+					info.CloneURL = "https://code.google.com/p/" + info.FullName
+				}
 			}
 		default:
 			if len(path) == 0 {

@@ -41,6 +41,11 @@ func TestParse(t *testing.T) {
 
 		{"code.google.com/p/go", "code.google.com/p/go", googleCodeRepo},
 		{"https://code.google.com/p/go", "code.google.com/p/go", googleCodeRepo},
+
+		// subpaths
+		{"http://github.com/user/repo/subpath#asdf", "github.com/user/repo", githubUserRepo},
+		{"git@github.com:user/repo.git/subpath#asdf", "github.com/user/repo", githubUserRepo},
+		{"https://code.google.com/p/go/subpath", "code.google.com/p/go", googleCodeRepo},
 	}
 
 	for _, test := range tests {
