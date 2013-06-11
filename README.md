@@ -11,16 +11,17 @@ Usage
 =====
 
 See full package documentation at
-[godoc.org/github.com/sqs/go-vcsurl](http://godoc.org/github.com/sqs/go-vcsurl).
+[godoc.org](http://godoc.org/github.com/sourcegraph/go-vcsurl) and
+[SourceGraph](https://sourcegraph.com/repos/github.com/sourcegraph/go-vcsurl).
 
-Example: [example_test.go](https://github.com/sqs/go-vcsurl/blob/master/example_test.go):
+Example: [example_test.go](https://github.com/sourcegraph/go-vcsurl/blob/master/example_test.go) ([SourceGraph](https://sourcegraph.com/repos/github.com/sourcegraph/go-vcsurl/tree/master/example_test.go)):
 
 ```go
 package vcsurl_test
 
 import (
 	"fmt"
-	"github.com/sqs/go-vcsurl"
+	"github.com/sourcegraph/go-vcsurl"
 )
 
 func ExampleParse() {
