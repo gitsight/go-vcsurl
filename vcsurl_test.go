@@ -46,6 +46,29 @@ func TestParse(t *testing.T) {
 		{"http://github.com/user/repo/subpath#asdf", "github.com/user/repo", githubUserRepo},
 		{"git@github.com:user/repo.git/subpath#asdf", "github.com/user/repo", githubUserRepo},
 		{"https://code.google.com/p/go/subpath", "code.google.com/p/go", googleCodeRepo},
+
+		// other repo hosts
+		{"git://example.com/foo", "example.com/foo", RepoInfo{
+			CloneURL: "git://example.com/foo",
+			VCS:      Git,
+			RepoHost: "example.com",
+			Name:     "foo",
+			FullName: "foo",
+		}},
+		{"https://example.com/foo.git", "example.com/foo", RepoInfo{
+			CloneURL: "https://example.com/foo.git",
+			VCS:      Git,
+			RepoHost: "example.com",
+			Name:     "foo",
+			FullName: "foo",
+		}},
+		{"https://example.com/git/foo", "example.com/foo", RepoInfo{
+			CloneURL: "https://example.com/git/foo",
+			VCS:      Git,
+			RepoHost: "example.com",
+			Name:     "foo",
+			FullName: "git/foo",
+		}},
 	}
 
 	for _, test := range tests {

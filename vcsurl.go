@@ -87,8 +87,15 @@ func Parse(spec string) (info *RepoInfo, err error) {
 			if len(path) == 0 {
 				return nil, fmt.Errorf("empty path in repo spec: %q", spec)
 			}
-			info.FullName = path[1:] // remove leading slash
+			path = path[1:] // remove leading slash
+			path = removeDotGit.ReplaceAllLiteralString(path, "")
+			info.FullName = path
 			info.Name = filepath.Base(path)
+			if strings.Contains(spec, "git") {
+				info.VCS = Git
+			} else if strings.Contains(spec, "hg") || strings.Contains(spec, "mercurial") {
+				info.VCS = Mercurial
+			}
 		}
 
 		if info.Name == "" || info.FullName == "" {
