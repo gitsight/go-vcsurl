@@ -11,7 +11,7 @@ import (
 type RepoHost string
 
 const (
-	Github     RepoHost = "github.com"
+	GitHub     RepoHost = "github.com"
 	GoogleCode RepoHost = "code.google.com"
 )
 
@@ -57,7 +57,7 @@ func Parse(spec string) (info *RepoInfo, err error) {
 		info.RepoHost = RepoHost(parsedURL.Host)
 		info.Rev = parsedURL.Fragment
 
-		if info.RepoHost == Github || parsedURL.Scheme == "git" {
+		if info.RepoHost == GitHub || parsedURL.Scheme == "git" {
 			info.VCS = Git
 		} else if info.RepoHost == GoogleCode && parsedURL.Scheme == "https" {
 			info.VCS = Mercurial
@@ -65,7 +65,7 @@ func Parse(spec string) (info *RepoInfo, err error) {
 
 		path := parsedURL.Path
 		switch info.RepoHost {
-		case Github:
+		case GitHub:
 			parts := strings.Split(path, "/")
 			if len(parts) >= 3 {
 				info.Username = parts[1]

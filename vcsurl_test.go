@@ -9,7 +9,7 @@ func TestParse(t *testing.T) {
 	githubUserRepo := RepoInfo{
 		CloneURL: "git://github.com/user/repo.git",
 		VCS:      Git,
-		RepoHost: Github,
+		RepoHost: GitHub,
 		Username: "user",
 		Name:     "repo",
 		FullName: "user/repo",
