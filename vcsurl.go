@@ -13,6 +13,7 @@ type RepoHost string
 const (
 	GitHub     RepoHost = "github.com"
 	GoogleCode RepoHost = "code.google.com"
+	PythonOrg  RepoHost = "hg.python.org"
 )
 
 type VCS string
@@ -82,6 +83,14 @@ func Parse(spec string) (info *RepoInfo, err error) {
 					info.FullName = info.Name
 					info.CloneURL = "https://code.google.com/p/" + info.FullName
 				}
+			}
+		case PythonOrg:
+			parts := strings.Split(path, "/")
+			if len(parts) >= 2 {
+				info.CloneURL = "http://hg.python.org" + path
+				info.VCS = Mercurial
+				info.Name = parts[len(parts)-1]
+				info.FullName = strings.Join(parts[1:], "/")
 			}
 		default:
 			if len(path) == 0 {

@@ -22,6 +22,13 @@ func TestParse(t *testing.T) {
 		Name:     "go",
 		FullName: "go",
 	}
+	cpythonRepo := RepoInfo{
+		CloneURL: "http://hg.python.org/cpython",
+		VCS:      Mercurial,
+		RepoHost: PythonOrg,
+		Name:     "cpython",
+		FullName: "cpython",
+	}
 	tests := []struct {
 		url  string
 		rid  string
@@ -41,6 +48,9 @@ func TestParse(t *testing.T) {
 
 		{"code.google.com/p/go", "code.google.com/p/go", googleCodeRepo},
 		{"https://code.google.com/p/go", "code.google.com/p/go", googleCodeRepo},
+
+		{"hg.python.org/cpython", "hg.python.org/cpython", cpythonRepo},
+		{"http://hg.python.org/cpython", "hg.python.org/cpython", cpythonRepo},
 
 		// subpaths
 		{"http://github.com/user/repo/subpath#asdf", "github.com/user/repo", githubUserRepo},
