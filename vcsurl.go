@@ -12,6 +12,7 @@ type RepoHost string
 
 const (
 	GitHub     RepoHost = "github.com"
+	Bitbucket  RepoHost = "bitbucket.org"
 	GoogleCode RepoHost = "code.google.com"
 	PythonOrg  RepoHost = "hg.python.org"
 )
@@ -62,6 +63,10 @@ func Parse(spec string) (info *RepoInfo, err error) {
 			info.VCS = Git
 		} else if info.RepoHost == GoogleCode && parsedURL.Scheme == "https" {
 			info.VCS = Mercurial
+		} else if info.RepoHost == Bitbucket && (parsedURL.Scheme == "https" || parsedURL.Scheme == "http") {
+			if !strings.HasSuffix(parsedURL.Path, ".git") {
+				info.VCS = Mercurial
+			}
 		}
 
 		path := parsedURL.Path
@@ -91,6 +96,14 @@ func Parse(spec string) (info *RepoInfo, err error) {
 				info.VCS = Mercurial
 				info.Name = parts[len(parts)-1]
 				info.FullName = strings.Join(parts[1:], "/")
+			}
+		case Bitbucket:
+			parts := strings.Split(path, "/")
+			if len(parts) >= 3 {
+				info.Username = parts[1]
+				info.Name = parts[2]
+				info.FullName = parts[1] + "/" + parts[2]
+				info.CloneURL = "https://bitbucket.org/" + info.FullName
 			}
 		default:
 			if len(path) == 0 {

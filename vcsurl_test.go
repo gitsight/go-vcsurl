@@ -29,6 +29,14 @@ func TestParse(t *testing.T) {
 		Name:     "cpython",
 		FullName: "cpython",
 	}
+	bitbucketRepo := RepoInfo{
+		CloneURL: "https://bitbucket.org/user/repo",
+		VCS:      Mercurial,
+		RepoHost: Bitbucket,
+		Username: "user",
+		Name:     "repo",
+		FullName: "user/repo",
+	}
 	tests := []struct {
 		url  string
 		rid  string
@@ -51,6 +59,10 @@ func TestParse(t *testing.T) {
 
 		{"hg.python.org/cpython", "hg.python.org/cpython", cpythonRepo},
 		{"http://hg.python.org/cpython", "hg.python.org/cpython", cpythonRepo},
+
+		{"bitbucket.org/user/repo", "bitbucket.org/user/repo", bitbucketRepo},
+		{"https://bitbucket.org/user/repo", "bitbucket.org/user/repo", bitbucketRepo},
+		{"http://bitbucket.org/user/repo", "bitbucket.org/user/repo", bitbucketRepo},
 
 		// subpaths
 		{"http://github.com/user/repo/subpath#asdf", "github.com/user/repo", githubUserRepo},
