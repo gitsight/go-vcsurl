@@ -35,6 +35,17 @@ type RepoInfo struct {
 	Rev      string   // a specific revision (commit ID, branch, etc.)
 }
 
+// Link returns the URL to the repository that is intended for access by humans
+// using a Web browser (i.e., not the URL to the API resource).
+func (r *RepoInfo) Link() string {
+	switch r.RepoHost {
+	case GoogleCode:
+		return fmt.Sprintf("https://code.google.com/p/%s", r.FullName)
+	default:
+		return (&url.URL{Scheme: "https", Host: string(r.RepoHost), Path: "/" + r.FullName}).String()
+	}
+}
+
 var removeDotGit = regexp.MustCompile(`\.git$`)
 
 // Parses a string that resembles a VCS repository URL. See TestParse for a list of supported URL

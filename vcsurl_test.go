@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestParse(t *testing.T) {
-	githubUserRepo := RepoInfo{
+var (
+	githubUserRepo = RepoInfo{
 		CloneURL: "git://github.com/user/repo.git",
 		VCS:      Git,
 		RepoHost: GitHub,
@@ -15,21 +15,21 @@ func TestParse(t *testing.T) {
 		FullName: "user/repo",
 		Rev:      "asdf",
 	}
-	googleCodeRepo := RepoInfo{
+	googleCodeRepo = RepoInfo{
 		CloneURL: "https://code.google.com/p/go",
 		VCS:      Mercurial,
 		RepoHost: GoogleCode,
 		Name:     "go",
 		FullName: "go",
 	}
-	cpythonRepo := RepoInfo{
+	cpythonRepo = RepoInfo{
 		CloneURL: "http://hg.python.org/cpython",
 		VCS:      Mercurial,
 		RepoHost: PythonOrg,
 		Name:     "cpython",
 		FullName: "cpython",
 	}
-	bitbucketRepo := RepoInfo{
+	bitbucketRepo = RepoInfo{
 		CloneURL: "https://bitbucket.org/user/repo",
 		VCS:      Mercurial,
 		RepoHost: Bitbucket,
@@ -37,6 +37,9 @@ func TestParse(t *testing.T) {
 		Name:     "repo",
 		FullName: "user/repo",
 	}
+)
+
+func TestParse(t *testing.T) {
 	tests := []struct {
 		url  string
 		rid  string
@@ -101,6 +104,24 @@ func TestParse(t *testing.T) {
 		}
 		if test.info != *info {
 			t.Errorf("%s: %v", test.url, pretty.Diff(test.info, *info))
+		}
+	}
+}
+
+func TestLink(t *testing.T) {
+	tests := []struct {
+		repo RepoInfo
+		link string
+	}{
+		{githubUserRepo, "https://github.com/user/repo"},
+		{bitbucketRepo, "https://bitbucket.org/user/repo"},
+		{googleCodeRepo, "https://code.google.com/p/go"},
+	}
+
+	for _, test := range tests {
+		link := test.repo.Link()
+		if test.link != link {
+			t.Errorf("%s: want link %q, got %q", test.repo.CloneURL, test.link, link)
 		}
 	}
 }
