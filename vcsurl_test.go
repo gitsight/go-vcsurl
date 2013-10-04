@@ -29,9 +29,17 @@ var (
 		Name:     "cpython",
 		FullName: "cpython",
 	}
-	bitbucketRepo = RepoInfo{
+	bitbucketHgRepo = RepoInfo{
 		CloneURL: "https://bitbucket.org/user/repo",
 		VCS:      Mercurial,
+		RepoHost: Bitbucket,
+		Username: "user",
+		Name:     "repo",
+		FullName: "user/repo",
+	}
+	bitbucketGitRepo = RepoInfo{
+		CloneURL: "https://bitbucket.org/user/repo.git",
+		VCS:      Git,
 		RepoHost: Bitbucket,
 		Username: "user",
 		Name:     "repo",
@@ -63,9 +71,13 @@ func TestParse(t *testing.T) {
 		{"hg.python.org/cpython", "hg.python.org/cpython", cpythonRepo},
 		{"http://hg.python.org/cpython", "hg.python.org/cpython", cpythonRepo},
 
-		{"bitbucket.org/user/repo", "bitbucket.org/user/repo", bitbucketRepo},
-		{"https://bitbucket.org/user/repo", "bitbucket.org/user/repo", bitbucketRepo},
-		{"http://bitbucket.org/user/repo", "bitbucket.org/user/repo", bitbucketRepo},
+		{"bitbucket.org/user/repo", "bitbucket.org/user/repo", bitbucketHgRepo},
+		{"https://bitbucket.org/user/repo", "bitbucket.org/user/repo", bitbucketHgRepo},
+		{"http://bitbucket.org/user/repo", "bitbucket.org/user/repo", bitbucketHgRepo},
+
+		{"bitbucket.org/user/repo.git", "bitbucket.org/user/repo", bitbucketGitRepo},
+		{"https://bitbucket.org/user/repo.git", "bitbucket.org/user/repo", bitbucketGitRepo},
+		{"http://bitbucket.org/user/repo.git", "bitbucket.org/user/repo", bitbucketGitRepo},
 
 		// subpaths
 		{"http://github.com/user/repo/subpath#asdf", "github.com/user/repo", githubUserRepo},
@@ -114,7 +126,8 @@ func TestLink(t *testing.T) {
 		link string
 	}{
 		{githubUserRepo, "https://github.com/user/repo"},
-		{bitbucketRepo, "https://bitbucket.org/user/repo"},
+		{bitbucketHgRepo, "https://bitbucket.org/user/repo"},
+		{bitbucketGitRepo, "https://bitbucket.org/user/repo"},
 		{googleCodeRepo, "https://code.google.com/p/go"},
 	}
 

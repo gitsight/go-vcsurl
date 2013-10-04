@@ -112,9 +112,16 @@ func Parse(spec string) (info *RepoInfo, err error) {
 			parts := strings.Split(path, "/")
 			if len(parts) >= 3 {
 				info.Username = parts[1]
+				if strings.HasSuffix(parts[2], ".git") {
+					info.VCS = Git
+					parts[2] = strings.TrimSuffix(parts[2], ".git")
+				}
 				info.Name = parts[2]
 				info.FullName = parts[1] + "/" + parts[2]
 				info.CloneURL = "https://bitbucket.org/" + info.FullName
+				if info.VCS == Git {
+					info.CloneURL += ".git"
+				}
 			}
 		default:
 			if len(path) == 0 {
