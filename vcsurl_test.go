@@ -45,6 +45,14 @@ var (
 		Name:     "repo",
 		FullName: "user/repo",
 	}
+	launchpadRepo = RepoInfo{
+		CloneURL: "bzr://launchpad.net/repo",
+		VCS:      Bazaar,
+		RepoHost: Launchpad,
+		Username: "",
+		Name:     "repo",
+		FullName: "repo",
+	}
 )
 
 func TestParse(t *testing.T) {
@@ -78,6 +86,10 @@ func TestParse(t *testing.T) {
 		{"bitbucket.org/user/repo.git", "bitbucket.org/user/repo", bitbucketGitRepo},
 		{"https://bitbucket.org/user/repo.git", "bitbucket.org/user/repo", bitbucketGitRepo},
 		{"http://bitbucket.org/user/repo.git", "bitbucket.org/user/repo", bitbucketGitRepo},
+
+		{"http://launchpad.net/repo", "launchpad.net/repo", launchpadRepo},
+		{"bzr://launchpad.net/repo", "launchpad.net/repo", launchpadRepo},
+		{"bzr+ssh://launchpad.net/repo", "launchpad.net/repo", launchpadRepo},
 
 		// subpaths
 		{"http://github.com/user/repo/subpath#asdf", "github.com/user/repo", githubUserRepo},

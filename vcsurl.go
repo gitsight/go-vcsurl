@@ -15,6 +15,7 @@ const (
 	Bitbucket  RepoHost = "bitbucket.org"
 	GoogleCode RepoHost = "code.google.com"
 	PythonOrg  RepoHost = "hg.python.org"
+	Launchpad  RepoHost = "launchpad.net"
 )
 
 type VCS string
@@ -22,6 +23,7 @@ type VCS string
 const (
 	Git       VCS = "git"
 	Mercurial VCS = "hg"
+	Bazaar    VCS = "bzr"
 )
 
 // RepoInfo describes a VCS repository.
@@ -78,6 +80,8 @@ func Parse(spec string) (info *RepoInfo, err error) {
 			if !strings.HasSuffix(parsedURL.Path, ".git") {
 				info.VCS = Mercurial
 			}
+		} else if info.RepoHost == Launchpad {
+			info.VCS = Bazaar
 		}
 
 		path := parsedURL.Path
@@ -136,6 +140,11 @@ func Parse(spec string) (info *RepoInfo, err error) {
 			} else if strings.Contains(spec, "hg") || strings.Contains(spec, "mercurial") {
 				info.VCS = Mercurial
 			}
+		}
+
+		if info.RepoHost == Launchpad {
+			parsedURL.Scheme = "bzr"
+			info.CloneURL = parsedURL.String()
 		}
 
 		if info.Name == "" || info.FullName == "" {
