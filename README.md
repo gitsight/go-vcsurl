@@ -2,10 +2,6 @@
 go-vcsurl - Lenient VCS repository URL parser
 =============================================
 
-[![xrefs](https://sourcegraph.com/api/repos/github.com/sourcegraph/go-vcsurl/badges/xrefs.png)](https://sourcegraph.com/github.com/sourcegraph/go-vcsurl)
-[![funcs](https://sourcegraph.com/api/repos/github.com/sourcegraph/go-vcsurl/badges/funcs.png)](https://sourcegraph.com/github.com/sourcegraph/go-vcsurl)
-[![top func](https://sourcegraph.com/api/repos/github.com/sourcegraph/go-vcsurl/badges/top-func.png)](https://sourcegraph.com/github.com/sourcegraph/go-vcsurl)
-[![library users](https://sourcegraph.com/api/repos/github.com/sourcegraph/go-vcsurl/badges/library-users.png)](https://sourcegraph.com/github.com/sourcegraph/go-vcsurl)
 [![status](https://sourcegraph.com/api/repos/github.com/sourcegraph/go-vcsurl/badges/status.png)](https://sourcegraph.com/github.com/sourcegraph/go-vcsurl)
 
 go-vcsurl parses VCS repository URLs in many common formats.
