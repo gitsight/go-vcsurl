@@ -2,7 +2,7 @@ package vcsurl_test
 
 import (
 	"fmt"
-	"github.com/sourcegraph/go-vcsurl"
+	"gopkg.in/sourcegraph/go-vcsurl.v1"
 )
 
 func ExampleParse() {
