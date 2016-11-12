@@ -48,13 +48,16 @@ func (r *RepoInfo) Link() string {
 	}
 }
 
-var removeDotGit = regexp.MustCompile(`\.git$`)
+var (
+	removeDotGit    = regexp.MustCompile(`\.git$`)
+	gitPreprocessRE = regexp.MustCompile("^git@([a-zA-Z0-9-_\\.]+)\\:(.*)$")
+)
 
 // Parses a string that resembles a VCS repository URL. See TestParse for a list of supported URL
 // formats.
 func Parse(spec string) (info *RepoInfo, err error) {
-	if strings.HasPrefix(spec, "git@github.com:") {
-		spec = strings.Replace(spec, "git@github.com:", "git://github.com/", 1)
+	if parts := gitPreprocessRE.FindStringSubmatch(spec); len(parts) == 3 {
+		spec = fmt.Sprintf("git://%s/%s", parts[1], parts[2])
 	}
 
 	var parsedURL *url.URL
