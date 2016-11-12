@@ -1,8 +1,9 @@
 package vcsurl
 
 import (
-	"github.com/kr/pretty"
 	"testing"
+
+	"github.com/kr/pretty"
 )
 
 var (
@@ -117,6 +118,13 @@ func TestParse(t *testing.T) {
 			RepoHost: "example.com",
 			Name:     "foo",
 			FullName: "git/foo",
+		}},
+		{"git@git.private.com:org/repo.git", "git.private.com/org/repo", RepoInfo{
+			CloneURL: "git://git.private.com/org/repo.git",
+			VCS:      Git,
+			RepoHost: "git.private.com",
+			Name:     "repo",
+			FullName: "org/repo",
 		}},
 	}
 
