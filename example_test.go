@@ -2,7 +2,8 @@ package vcsurl_test
 
 import (
 	"fmt"
-	"gopkg.in/sourcegraph/go-vcsurl.v1"
+
+	"github.com/gitsight/go-vcsurl"
 )
 
 func ExampleParse() {
@@ -18,7 +19,7 @@ func ExampleParse() {
 			fmt.Printf("   name: %s\n", info.Name)
 			fmt.Printf("   host: %s\n", info.RepoHost)
 		} else {
-			fmt.Printf("error parsing %s\n")
+			fmt.Printf("error parsing %s\n", err)
 		}
 	}
 
