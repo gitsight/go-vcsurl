@@ -7,49 +7,55 @@ import (
 )
 
 var (
-	githubUserRepo = RepoInfo{
+	githubUserRepo = VCS{
+		ID:       "github.com/user/repo",
 		CloneURL: "git://github.com/user/repo.git",
 		VCS:      Git,
-		RepoHost: GitHub,
+		Host:     GitHub,
 		Username: "user",
 		Name:     "repo",
 		FullName: "user/repo",
 		Rev:      "asdf",
 	}
-	googleCodeRepo = RepoInfo{
+	googleCodeRepo = VCS{
+		ID:       "code.google.com/go",
 		CloneURL: "https://code.google.com/p/go",
 		VCS:      Mercurial,
-		RepoHost: GoogleCode,
+		Host:     GoogleCode,
 		Name:     "go",
 		FullName: "go",
 	}
-	cpythonRepo = RepoInfo{
+	cpythonRepo = VCS{
+		ID:       "hg.python.org/cpython",
 		CloneURL: "http://hg.python.org/cpython",
 		VCS:      Mercurial,
-		RepoHost: PythonOrg,
+		Host:     PythonOrg,
 		Name:     "cpython",
 		FullName: "cpython",
 	}
-	bitbucketHgRepo = RepoInfo{
+	bitbucketHgRepo = VCS{
+		ID:       "bitbucket.org/user/repo",
 		CloneURL: "https://bitbucket.org/user/repo",
 		VCS:      Mercurial,
-		RepoHost: Bitbucket,
+		Host:     Bitbucket,
 		Username: "user",
 		Name:     "repo",
 		FullName: "user/repo",
 	}
-	bitbucketGitRepo = RepoInfo{
+	bitbucketGitRepo = VCS{
+		ID:       "bitbucket.org/user/repo",
 		CloneURL: "https://bitbucket.org/user/repo.git",
 		VCS:      Git,
-		RepoHost: Bitbucket,
+		Host:     Bitbucket,
 		Username: "user",
 		Name:     "repo",
 		FullName: "user/repo",
 	}
-	launchpadRepo = RepoInfo{
+	launchpadRepo = VCS{
+		ID:       "launchpad.net/repo",
 		CloneURL: "bzr://launchpad.net/repo",
 		VCS:      Bazaar,
-		RepoHost: Launchpad,
+		Host:     Launchpad,
 		Username: "",
 		Name:     "repo",
 		FullName: "repo",
@@ -60,7 +66,7 @@ func TestParse(t *testing.T) {
 	tests := []struct {
 		url  string
 		rid  string
-		info RepoInfo
+		info VCS
 	}{
 		{"github.com/user/repo#asdf", "github.com/user/repo", githubUserRepo},
 		{"http://github.com/user/repo#asdf", "github.com/user/repo", githubUserRepo},
@@ -99,31 +105,35 @@ func TestParse(t *testing.T) {
 		{"https://code.google.com/p/go/subpath", "code.google.com/p/go", googleCodeRepo},
 
 		// other repo hosts
-		{"git://example.com/foo", "example.com/foo", RepoInfo{
+		{"git://example.com/foo", "example.com/foo", VCS{
+			ID:       "example.com/foo",
 			CloneURL: "git://example.com/foo",
 			VCS:      Git,
-			RepoHost: "example.com",
+			Host:     "example.com",
 			Name:     "foo",
 			FullName: "foo",
 		}},
-		{"https://example.com/foo.git", "example.com/foo", RepoInfo{
+		{"https://example.com/foo.git", "example.com/foo", VCS{
+			ID:       "example.com/foo",
 			CloneURL: "https://example.com/foo.git",
 			VCS:      Git,
-			RepoHost: "example.com",
+			Host:     "example.com",
 			Name:     "foo",
 			FullName: "foo",
 		}},
-		{"https://example.com/git/foo", "example.com/foo", RepoInfo{
+		{"https://example.com/git/foo", "example.com/foo", VCS{
+			ID:       "example.com/git/foo",
 			CloneURL: "https://example.com/git/foo",
 			VCS:      Git,
-			RepoHost: "example.com",
+			Host:     "example.com",
 			Name:     "foo",
 			FullName: "git/foo",
 		}},
-		{"git@git.private.com:org/repo.git", "git.private.com/org/repo", RepoInfo{
+		{"git@git.private.com:org/repo.git", "git.private.com/org/repo", VCS{
+			ID:       "git.private.com/org/repo",
 			CloneURL: "git://git.private.com/org/repo.git",
 			VCS:      Git,
-			RepoHost: "git.private.com",
+			Host:     "git.private.com",
 			Name:     "repo",
 			FullName: "org/repo",
 		}},
@@ -143,7 +153,7 @@ func TestParse(t *testing.T) {
 
 func TestLink(t *testing.T) {
 	tests := []struct {
-		repo RepoInfo
+		repo VCS
 		link string
 	}{
 		{githubUserRepo, "https://github.com/user/repo"},

@@ -8,46 +8,55 @@ import (
 	"strings"
 )
 
-type RepoHost string
+type Host string
 
 const (
-	GitHub     RepoHost = "github.com"
-	Bitbucket  RepoHost = "bitbucket.org"
-	GoogleCode RepoHost = "code.google.com"
-	PythonOrg  RepoHost = "hg.python.org"
-	Launchpad  RepoHost = "launchpad.net"
-	GitLab     RepoHost = "gitlab.com"
+	GitHub     Host = "github.com"
+	Bitbucket  Host = "bitbucket.org"
+	GoogleCode Host = "code.google.com"
+	PythonOrg  Host = "hg.python.org"
+	Launchpad  Host = "launchpad.net"
+	GitLab     Host = "gitlab.com"
 
-	gitHubAPI RepoHost = "api.github.com"
+	gitHubAPI Host = "api.github.com"
 )
 
-type VCS string
+type Kind string
 
 const (
-	Git       VCS = "git"
-	Mercurial VCS = "hg"
-	Bazaar    VCS = "bzr"
+	Git       Kind = "git"
+	Mercurial Kind = "hg"
+	Bazaar    Kind = "bzr"
 )
 
-// RepoInfo describes a VCS repository.
-type RepoInfo struct {
-	CloneURL string   // clone URL
-	VCS      VCS      // VCS type
-	RepoHost RepoHost // repo hosting site
-	Username string   // username of repo owner on repo hosting site
-	Name     string   // base name of repo on repo hosting site
-	FullName string   // full name of repo on repo hosting site
-	Rev      string   // a specific revision (commit ID, branch, etc.)
+// VCS describes a VCS repository.
+type VCS struct {
+	// ID unique repository identification.
+	ID string
+	// CloneURL git remote format.
+	CloneURL string
+	// VCS type
+	VCS Kind
+	// Host is the public web of the repository.
+	Host Host
+	// Username of repo owner on repo hosting site.
+	Username string
+	// Name base name of repo on repo hosting site.
+	Name string
+	// FullName full name of repo on repo hosting site.
+	FullName string
+	// Rev a specific revision (commit ID, branch, etc.).
+	Rev string
 }
 
 // Link returns the URL to the repository that is intended for access by humans
 // using a Web browser (i.e., not the URL to the API resource).
-func (r *RepoInfo) Link() string {
-	switch r.RepoHost {
+func (r *VCS) Link() string {
+	switch r.Host {
 	case GoogleCode:
 		return fmt.Sprintf("https://code.google.com/p/%s", r.FullName)
 	default:
-		return (&url.URL{Scheme: "https", Host: string(r.RepoHost), Path: "/" + r.FullName}).String()
+		return (&url.URL{Scheme: "https", Host: string(r.Host), Path: "/" + r.FullName}).String()
 	}
 }
 
@@ -58,7 +67,7 @@ var (
 
 // Parses a string that resembles a VCS repository URL. See TestParse for a list of supported URL
 // formats.
-func Parse(spec string) (info *RepoInfo, err error) {
+func Parse(spec string) (info *VCS, err error) {
 	if parts := gitPreprocessRE.FindStringSubmatch(spec); len(parts) == 3 {
 		spec = fmt.Sprintf("git://%s/%s", parts[1], parts[2])
 	}
@@ -72,26 +81,26 @@ func Parse(spec string) (info *RepoInfo, err error) {
 			}
 		}
 
-		info = new(RepoInfo)
+		info = new(VCS)
 
 		info.CloneURL = parsedURL.String()
-		info.RepoHost = RepoHost(parsedURL.Host)
+		info.Host = Host(parsedURL.Host)
 		info.Rev = parsedURL.Fragment
 
-		if info.RepoHost == GitHub || parsedURL.Scheme == "git" {
+		if info.Host == GitHub || parsedURL.Scheme == "git" {
 			info.VCS = Git
-		} else if info.RepoHost == GoogleCode && parsedURL.Scheme == "https" {
+		} else if info.Host == GoogleCode && parsedURL.Scheme == "https" {
 			info.VCS = Mercurial
-		} else if info.RepoHost == Bitbucket && (parsedURL.Scheme == "https" || parsedURL.Scheme == "http") {
+		} else if info.Host == Bitbucket && (parsedURL.Scheme == "https" || parsedURL.Scheme == "http") {
 			if !strings.HasSuffix(parsedURL.Path, ".git") {
 				info.VCS = Mercurial
 			}
-		} else if info.RepoHost == Launchpad {
+		} else if info.Host == Launchpad {
 			info.VCS = Bazaar
 		}
 
 		path := parsedURL.Path
-		switch info.RepoHost {
+		switch info.Host {
 		case GitHub:
 			parts := strings.Split(path, "/")
 			if len(parts) >= 3 {
@@ -104,7 +113,7 @@ func Parse(spec string) (info *RepoInfo, err error) {
 			parts := strings.Split(path, "/")
 			if len(parts) >= 4 && parts[1] == "repos" {
 				info.VCS = Git
-				info.RepoHost = GitHub
+				info.Host = GitHub
 				info.Username = parts[2]
 				info.Name = removeDotGit.ReplaceAllLiteralString(parts[3], "")
 				info.FullName = info.Username + "/" + info.Name
@@ -160,13 +169,17 @@ func Parse(spec string) (info *RepoInfo, err error) {
 			}
 		}
 
-		if info.RepoHost == Launchpad {
+		if info.Host == Launchpad {
 			parsedURL.Scheme = "bzr"
 			info.CloneURL = parsedURL.String()
 		}
 
 		if info.Name == "" || info.FullName == "" {
 			return nil, fmt.Errorf("unable to determine name or full name for repo spec %q", spec)
+		}
+
+		if info.ID == "" {
+			info.ID = fmt.Sprintf("%s/%s", string(info.Host), info.FullName)
 		}
 
 		return info, nil

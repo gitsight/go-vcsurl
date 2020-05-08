@@ -24,7 +24,7 @@ func ExampleParse() {
 		if info, err := vcsurl.Parse(url); err == nil {
 			fmt.Printf("%d. %s %s\n", i+1, info.VCS, info.CloneURL)
 			fmt.Printf("   name: %s\n", info.Name)
-			fmt.Printf("   host: %s\n", info.RepoHost)
+			fmt.Printf("   host: %s\n", info.Host)
 		} else {
 			fmt.Printf("error parsing %s\n", err)
 		}
