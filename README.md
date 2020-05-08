@@ -1,28 +1,16 @@
-=============================================
-go-vcsurl - Lenient VCS repository URL parser
-=============================================
-
-[![status](https://sourcegraph.com/api/repos/github.com/sourcegraph/go-vcsurl/badges/status.png)](https://sourcegraph.com/github.com/sourcegraph/go-vcsurl)
+# go-vcsurl
 
 go-vcsurl parses VCS repository URLs in many common formats.
-
-Note: the public API is experimental and subject to change until further notice.
 
 
 Usage
 =====
 
-Documentation:
-[go-vcsurl on Sourcegraph](https://sourcegraph.com/github.com/sourcegraph/go-vcsurl).
-
-Example: [example_test.go](https://github.com/sourcegraph/go-vcsurl/blob/master/example_test.go) ([Sourcegraph](https://sourcegraph.com/github.com/sourcegraph/go-vcsurl/tree/master/example_test.go)):
-
 ```go
-package vcsurl_test
-
 import (
 	"fmt"
-	"gopkg.in/sourcegraph/go-vcsurl.v1"
+
+	"github.com/gitsight/go-vcsurl"
 )
 
 func ExampleParse() {
@@ -38,7 +26,7 @@ func ExampleParse() {
 			fmt.Printf("   name: %s\n", info.Name)
 			fmt.Printf("   host: %s\n", info.RepoHost)
 		} else {
-			fmt.Printf("error parsing %s\n")
+			fmt.Printf("error parsing %s\n", err)
 		}
 	}
 
@@ -57,15 +45,3 @@ func ExampleParse() {
 	//    host: code.google.com
 }
 ```
-
-
-Running tests
-=============
-
-Run `go test`.
-
-
-Contributors
-============
-
-* Quinn Slack <sqs@sourcegraph.com>
