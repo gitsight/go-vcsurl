@@ -16,6 +16,9 @@ const (
 	GoogleCode RepoHost = "code.google.com"
 	PythonOrg  RepoHost = "hg.python.org"
 	Launchpad  RepoHost = "launchpad.net"
+	GitLab     RepoHost = "gitlab.com"
+
+	gitHubAPI RepoHost = "api.github.com"
 )
 
 type VCS string
@@ -93,19 +96,31 @@ func Parse(spec string) (info *RepoInfo, err error) {
 			parts := strings.Split(path, "/")
 			if len(parts) >= 3 {
 				info.Username = parts[1]
-				parts[2] = removeDotGit.ReplaceAllLiteralString(parts[2], "")
-				info.Name = parts[2]
-				info.FullName = parts[1] + "/" + parts[2]
+				info.Name = removeDotGit.ReplaceAllLiteralString(parts[2], "")
+				info.FullName = info.Username + "/" + info.Name
 				info.CloneURL = "git://github.com/" + info.FullName + ".git"
 			}
+		case gitHubAPI:
+			parts := strings.Split(path, "/")
+			if len(parts) >= 4 && parts[1] == "repos" {
+				info.VCS = Git
+				info.RepoHost = GitHub
+				info.Username = parts[2]
+				info.Name = removeDotGit.ReplaceAllLiteralString(parts[3], "")
+				info.FullName = info.Username + "/" + info.Name
+				info.CloneURL = "git://github.com/" + info.FullName + ".git"
+			}
+
+			if len(parts) >= 6 && parts[4] == "commits" {
+				info.Rev = parts[5]
+			}
+
 		case GoogleCode:
 			parts := strings.Split(path, "/")
-			if len(parts) >= 3 {
-				if parts[1] == "p" {
-					info.Name = parts[2]
-					info.FullName = info.Name
-					info.CloneURL = "https://code.google.com/p/" + info.FullName
-				}
+			if len(parts) >= 3 && parts[1] == "p" {
+				info.Name = parts[2]
+				info.FullName = info.Name
+				info.CloneURL = "https://code.google.com/p/" + info.FullName
 			}
 		case PythonOrg:
 			parts := strings.Split(path, "/")

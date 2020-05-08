@@ -73,6 +73,7 @@ func TestParse(t *testing.T) {
 		{"git+ssh://github.com/user/repo.git#asdf", "github.com/user/repo", githubUserRepo},
 		{"git@github.com:user/repo#asdf", "github.com/user/repo", githubUserRepo},
 		{"git@github.com:user/repo.git#asdf", "github.com/user/repo", githubUserRepo},
+		{"https://api.github.com/repos/user/repo/commits/asdf", "github.com/user/repo", githubUserRepo},
 
 		{"code.google.com/p/go", "code.google.com/p/go", googleCodeRepo},
 		{"https://code.google.com/p/go", "code.google.com/p/go", googleCodeRepo},
