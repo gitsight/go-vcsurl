@@ -46,6 +46,7 @@ var kindByHost = map[Host]Kind{
 	GitHub:    Git,
 	gitHubAPI: Git,
 	GitLab:    Git,
+	Bitbucket: Git,
 }
 
 // VCS describes a VCS repository.
@@ -64,8 +65,9 @@ type VCS struct {
 	Name string
 	// FullName full name of repo on repo hosting site.
 	FullName string
-	// Rev a specific revision (commit ID, branch, etc.).
-	Rev string
+	// Committish is a reference to an object that can be recursively
+	// dereferenced to a commit object. They can be commits, tags or branches.
+	Committish string
 }
 
 var (
@@ -96,7 +98,7 @@ func Parse(spec string) (*VCS, error) {
 
 	info.CloneURL = parsedURL.String()
 	info.Host = Host(parsedURL.Host)
-	info.Rev = parsedURL.Fragment
+	info.Committish = parsedURL.Fragment
 	info.Kind = kindByHost[info.Host]
 
 	path := parsedURL.Path
@@ -107,15 +109,12 @@ func Parse(spec string) (*VCS, error) {
 		}
 
 	case Bitbucket:
-		parts := strings.Split(path, "/")
-		if len(parts) >= 3 {
-			info.Username = parts[1]
-			if strings.HasSuffix(parts[2], ".git") {
-				info.Kind = Git
-				parts[2] = strings.TrimSuffix(parts[2], ".git")
-			}
-			info.Name = parts[2]
-			info.FullName = parts[1] + "/" + parts[2]
+		if err := info.parseBitbucket(parsedURL); err != nil {
+			return nil, err
+		}
+	case GitLab:
+		if err := info.parseGitlab(parsedURL); err != nil {
+			return nil, err
 		}
 	default:
 		if len(path) == 0 {
@@ -161,8 +160,69 @@ func (v *VCS) parseGitHub(url *url.URL) error {
 	v.Name = removeDotGit.ReplaceAllLiteralString(parts[2], "")
 	v.FullName = v.Username + "/" + v.Name
 
-	if len(parts) >= 5 && (parts[3] == "commits" || parts[3] == "commit") {
-		v.Rev = parts[4]
+	if len(parts) < 5 {
+		return nil
+	}
+
+	if _, ok := githubCommittishParts[parts[3]]; ok {
+		v.Committish = strings.Join(parts[4:], "/")
+		return nil
+	}
+
+	if len(parts) >= 6 && parts[3] == "releases" {
+		v.Committish = parts[5]
+	}
+
+	return nil
+}
+
+var githubCommittishParts = map[string]struct{}{
+	"commits":  struct{}{},
+	"commit":   struct{}{},
+	"tree":     struct{}{},
+	"branches": struct{}{},
+}
+
+func (v *VCS) parseBitbucket(url *url.URL) error {
+	parts := strings.Split(url.Path, "/")
+	if len(parts) < 3 {
+		return ErrUnknownURL
+	}
+
+	v.Username = parts[1]
+	v.Name = removeDotGit.ReplaceAllLiteralString(parts[2], "")
+	v.FullName = v.Username + "/" + v.Name
+
+	if len(parts) >= 5 && (parts[3] == "src" || parts[3] == "commits" || parts[3] == "branch") {
+		v.Committish = parts[4]
+	}
+
+	return nil
+}
+
+func (v *VCS) parseGitlab(url *url.URL) error {
+	parts := strings.Split(url.Path, "/")
+	if len(parts) < 3 {
+		return ErrUnknownURL
+	}
+
+	var last int
+	for _, p := range parts {
+		if p == "-" {
+			break
+		}
+		last++
+	}
+
+	v.Username = strings.Join(parts[1:last-1], "/")
+	v.Name = removeDotGit.ReplaceAllLiteralString(parts[last-1], "")
+	v.FullName = v.Username + "/" + v.Name
+
+	if len(parts) >= (last + 2) {
+		object := parts[last+1]
+		if object == "tags" || object == "commit" || object == "tree" {
+			v.Committish = strings.Join(parts[last+2:], "/")
+		}
 	}
 
 	return nil
