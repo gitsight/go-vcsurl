@@ -9,8 +9,12 @@ import (
 	"strings"
 )
 
+// Errors returned by Parse function.
 var (
-	ErrUnknownURL = errors.New("unknown URL format")
+	ErrUnknownURL  = errors.New("unknown URL format")
+	ErrUnableParse = errors.New("unable to determine name or full name")
+	ErrEmptyURL    = errors.New("empty URL")
+	ErrEmptyPath   = errors.New("empty path in URL")
 )
 
 // Host VCS provider.
@@ -77,7 +81,12 @@ var (
 
 // Parse parses a string that resembles a VCS repository URL. See TestParse for
 // a list of supported URL formats.
-func Parse(spec string) (*VCS, error) {
+func Parse(raw string) (*VCS, error) {
+	if len(raw) == 0 {
+		return nil, fmt.Errorf("parse %q: %w", raw, ErrEmptyURL)
+	}
+
+	spec := raw
 	if parts := gitPreprocessRE.FindStringSubmatch(spec); len(parts) == 3 {
 		spec = fmt.Sprintf("git://%s/%s", parts[1], parts[2])
 	}
@@ -94,50 +103,30 @@ func Parse(spec string) (*VCS, error) {
 		}
 	}
 
-	info := &VCS{}
+	vcs := &VCS{}
+	vcs.Host = Host(parsedURL.Host)
+	vcs.Kind = kindByHost[vcs.Host]
 
-	info.CloneURL = parsedURL.String()
-	info.Host = Host(parsedURL.Host)
-	info.Committish = parsedURL.Fragment
-	info.Kind = kindByHost[info.Host]
-
-	path := parsedURL.Path
-	switch info.Host {
+	switch vcs.Host {
 	case GitHub, gitHubAPI:
-		if err := info.parseGitHub(parsedURL); err != nil {
-			return nil, err
-		}
-
+		err = vcs.parseGitHub(parsedURL)
 	case Bitbucket:
-		if err := info.parseBitbucket(parsedURL); err != nil {
-			return nil, err
-		}
+		err = vcs.parseBitbucket(parsedURL)
 	case GitLab:
-		if err := info.parseGitlab(parsedURL); err != nil {
-			return nil, err
-		}
+		err = vcs.parseGitlab(parsedURL)
 	default:
-		if len(path) == 0 {
-			return nil, fmt.Errorf("empty path in repo spec: %q", spec)
-		}
-		path = path[1:] // remove leading slash
-		path = removeDotGit.ReplaceAllLiteralString(path, "")
-		info.FullName = path
-		info.Name = filepath.Base(path)
-		if strings.Contains(spec, "git") {
-			info.Kind = Git
-		}
+		err = vcs.parseDefault(parsedURL)
 	}
 
-	if info.Name == "" || info.FullName == "" {
-		return nil, fmt.Errorf("unable to determine name or full name for repo spec %q", spec)
+	if err != nil {
+		return nil, fmt.Errorf("parse %q: %w", raw, err)
 	}
 
-	if info.ID == "" {
-		info.ID = fmt.Sprintf("%s/%s", string(info.Host), info.FullName)
+	if vcs.ID == "" {
+		vcs.ID = fmt.Sprintf("%s/%s", string(vcs.Host), vcs.FullName)
 	}
 
-	return info, nil
+	return vcs, nil
 
 }
 
@@ -223,6 +212,27 @@ func (v *VCS) parseGitlab(url *url.URL) error {
 		if object == "tags" || object == "commit" || object == "tree" {
 			v.Committish = strings.Join(parts[last+2:], "/")
 		}
+	}
+
+	return nil
+}
+
+func (v *VCS) parseDefault(url *url.URL) error {
+	path := url.Path
+	if len(path) == 0 {
+		return ErrEmptyPath
+	}
+
+	path = path[1:] // remove leading slash
+	path = removeDotGit.ReplaceAllLiteralString(path, "")
+	v.FullName = path
+	v.Name = filepath.Base(path)
+	if strings.Contains(url.String(), "git") {
+		v.Kind = Git
+	}
+
+	if v.Name == "" || v.FullName == "" {
+		return ErrUnableParse
 	}
 
 	return nil
