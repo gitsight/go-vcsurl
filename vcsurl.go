@@ -65,8 +65,6 @@ var kindByHost = map[Host]Kind{
 type VCS struct {
 	// ID unique repository identification.
 	ID string
-	// CloneURL git remote format.
-	CloneURL string
 	// Kind of VCS.
 	Kind Kind
 	// Host is the public web of the repository.
