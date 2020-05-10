@@ -11,10 +11,12 @@ import (
 
 // Errors returned by Parse function.
 var (
-	ErrUnknownURL  = errors.New("unknown URL format")
-	ErrUnableParse = errors.New("unable to determine name or full name")
-	ErrEmptyURL    = errors.New("empty URL")
-	ErrEmptyPath   = errors.New("empty path in URL")
+	ErrUnknownURL          = errors.New("unknown URL format")
+	ErrUnableParse         = errors.New("unable to determine name or full name")
+	ErrEmptyURL            = errors.New("empty URL")
+	ErrEmptyPath           = errors.New("empty path in URL")
+	ErrUnknownProtocol     = errors.New("remote protocol should be SSH or HTTPS")
+	ErrUnsupportedProtocol = errors.New("unsupported remote protocol")
 )
 
 // Host VCS provider.
@@ -46,6 +48,12 @@ const (
 	HTTPS Protocol = "https"
 )
 
+var knownHosts = map[Host]struct{}{
+	GitHub:    struct{}{},
+	GitLab:    struct{}{},
+	Bitbucket: struct{}{},
+}
+
 var kindByHost = map[Host]Kind{
 	GitHub:    Git,
 	gitHubAPI: Git,
@@ -72,6 +80,8 @@ type VCS struct {
 	// Committish is a reference to an object that can be recursively
 	// dereferenced to a commit object. They can be commits, tags or branches.
 	Committish string
+	// Raw is the original parsed URL.
+	Raw string
 }
 
 var (
@@ -104,6 +114,7 @@ func Parse(raw string) (*VCS, error) {
 	}
 
 	vcs := &VCS{}
+	vcs.Raw = raw
 	vcs.Host = Host(parsedURL.Host)
 	vcs.Kind = kindByHost[vcs.Host]
 
@@ -238,15 +249,40 @@ func (v *VCS) parseDefault(url *url.URL) error {
 	return nil
 }
 
-func (v *VCS) Remote(p Protocol) string {
+// Remote returns a remote URL in the given protocol. ErrUnsupportedProtocol
+// is returned if the protocol it's not supported by the VCS.
+func (v *VCS) Remote(p Protocol) (string, error) {
+	if _, ok := knownHosts[v.Host]; !ok {
+		return v.remoteUnknownHost(p)
+	}
+
 	switch p {
 	case SSH:
-		return v.sshRemote()
+		return v.sshRemote(), nil
 	case HTTPS:
-		return v.httpsRemote()
-	default:
-		return ""
+		return v.httpsRemote(), nil
 	}
+
+	return "", ErrUnknownProtocol
+
+}
+
+func (v *VCS) remoteUnknownHost(p Protocol) (string, error) {
+	switch p {
+	case SSH:
+		if gitPreprocessRE.MatchString(v.Raw) {
+			return v.Raw, nil
+		}
+	case HTTPS:
+		parsed, _ := url.Parse(v.Raw)
+		if parsed.Scheme == "https" {
+			return v.Raw, nil
+		}
+	default:
+		return "", ErrUnknownProtocol
+	}
+
+	return "", ErrUnsupportedProtocol
 }
 
 // git@gitlab.com:commento/docs.git
@@ -260,10 +296,5 @@ func (v *VCS) sshRemote() string {
 // https://gitlab.com/commento/docs.git
 // https://github.com/go-git/go-git.git
 func (v *VCS) httpsRemote() string {
-	var auth string
-	if v.Host == Bitbucket {
-		auth = fmt.Sprintf("%s@", v.Username)
-	}
-
-	return fmt.Sprintf("https://%s%s/%s/%s.git", auth, v.Host, v.Username, v.Name)
+	return fmt.Sprintf("https://%s/%s/%s.git", v.Host, v.Username, v.Name)
 }

@@ -232,6 +232,8 @@ func TestParse_Default(t *testing.T) {
 			t.Run(url, func(t *testing.T) {
 				vcs, err := vcsurl.Parse(url)
 				require.NoError(t, err)
+
+				vcs.Raw = ""
 				require.Equal(t, test.vcs, vcs)
 			})
 		}
@@ -246,4 +248,35 @@ func TestParse_Empty(t *testing.T) {
 func TestParse_Invalid(t *testing.T) {
 	_, err := vcsurl.Parse("foo")
 	require.Error(t, err)
+}
+
+func TestVCSRemote(t *testing.T) {
+	tests := []struct {
+		raw      string
+		p        vcsurl.Protocol
+		expected string
+		err      error
+	}{
+		{"https://github.com/foo/bar", vcsurl.SSH, "git@github.com/foo/bar.git", nil},
+		{"https://github.com/foo/bar", vcsurl.HTTPS, "https://github.com/foo/bar.git", nil},
+		{"https://bitbucket.org/foo/bar", vcsurl.SSH, "git@bitbucket.org/foo/bar.git", nil},
+		{"https://bitbucket.org/foo/bar", vcsurl.HTTPS, "https://bitbucket.org/foo/bar.git", nil},
+		{"https://gitlab.com/foo/bar", vcsurl.SSH, "git@gitlab.com/foo/bar.git", nil},
+		{"https://gitlab.com/foo/bar", vcsurl.HTTPS, "https://gitlab.com/foo/bar.git", nil},
+		{"git://git.savannah.gnu.org/bash.git", vcsurl.SSH, "", vcsurl.ErrUnsupportedProtocol},
+		{"git://git.savannah.gnu.org/bash.git", vcsurl.HTTPS, "", vcsurl.ErrUnsupportedProtocol},
+		{"https://git.savannah.gnu.org/git/bash.git", vcsurl.SSH, "", vcsurl.ErrUnsupportedProtocol},
+		{"https://git.savannah.gnu.org/git/bash.git", vcsurl.HTTPS, "https://git.savannah.gnu.org/git/bash.git", nil},
+	}
+
+	for _, test := range tests {
+		t.Run(test.raw, func(t *testing.T) {
+			vcs, err := vcsurl.Parse(test.raw)
+			require.NoError(t, err)
+
+			remote, err := vcs.Remote(test.p)
+			require.Equal(t, test.expected, remote)
+			require.Equal(t, test.err, err)
+		})
+	}
 }
