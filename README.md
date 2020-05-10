@@ -1,4 +1,5 @@
-# go-vcsurl
+# go-vcsurl [![GoDoc](https://godoc.org/github.com/gitsight/go-vcsurl?status.svg)](https://pkg.go.dev/github.com/gitsight/go-vcsurl) [![Test](https://github.com/gitsight/go-vcsurl/workflows/Test/badge.svg)](https://github.com/gitsight/go-vcsurl/actions?query=workflow%3ATest)
+
 
 `go-vcsurl` library provides a VCS URL parser for HTTP, git or ssh remote URLs
 and also frontend URLs from providers like GitHub, GitLab, and Bitbucket. 
