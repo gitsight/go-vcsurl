@@ -9,7 +9,7 @@ This library is based on the previous work done by [@sourcegraph](https://github
 Installation
 ------------
 
-The recommended way to install go-syslog
+The recommended way to install go-vcsurl
 
 ```
 go get github.com/gitsight/go-vcsurl
@@ -48,9 +48,9 @@ for i, url := range urls {
 
 ```
 1. git github.com/alice/libfoo
-  name: libfoo
-  host: github.com
-  remote: git@github.com/alice/libfoo.git
+   name: libfoo
+   host: github.com
+   remote: git@github.com/alice/libfoo.git
 2. git github.com/bob/libbar
    name: libbar
    host: github.com
