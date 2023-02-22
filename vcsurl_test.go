@@ -257,11 +257,11 @@ func TestVCSRemote(t *testing.T) {
 		expected string
 		err      error
 	}{
-		{"https://github.com/foo/bar", vcsurl.SSH, "git@github.com/foo/bar.git", nil},
+		{"https://github.com/foo/bar", vcsurl.SSH, "git@github.com:foo/bar.git", nil},
 		{"https://github.com/foo/bar", vcsurl.HTTPS, "https://github.com/foo/bar.git", nil},
-		{"https://bitbucket.org/foo/bar", vcsurl.SSH, "git@bitbucket.org/foo/bar.git", nil},
+		{"https://bitbucket.org/foo/bar", vcsurl.SSH, "git@bitbucket.org:foo/bar.git", nil},
 		{"https://bitbucket.org/foo/bar", vcsurl.HTTPS, "https://bitbucket.org/foo/bar.git", nil},
-		{"https://gitlab.com/foo/bar", vcsurl.SSH, "git@gitlab.com/foo/bar.git", nil},
+		{"https://gitlab.com/foo/bar", vcsurl.SSH, "git@gitlab.com:foo/bar.git", nil},
 		{"https://gitlab.com/foo/bar", vcsurl.HTTPS, "https://gitlab.com/foo/bar.git", nil},
 		{"git://git.savannah.gnu.org/bash.git", vcsurl.SSH, "", vcsurl.ErrUnsupportedProtocol},
 		{"git://git.savannah.gnu.org/bash.git", vcsurl.HTTPS, "", vcsurl.ErrUnsupportedProtocol},

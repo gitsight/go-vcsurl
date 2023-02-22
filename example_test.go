@@ -37,18 +37,18 @@ func ExampleParse() {
 	// 1. git github.com/alice/libfoo
 	//    name: libfoo
 	//    host: github.com
-	//    remote: git@github.com/alice/libfoo.git
+	//    remote: git@github.com:alice/libfoo.git
 	// 2. git github.com/bob/libbar
 	//    name: libbar
 	//    host: github.com
-	//    remote: git@github.com/bob/libbar.git
+	//    remote: git@github.com:bob/libbar.git
 	// 3. git gitlab.com/foo/bar
 	//    name: bar
 	//    host: gitlab.com
-	//    remote: git@gitlab.com/foo/bar.git
+	//    remote: git@gitlab.com:foo/bar.git
 	// 4. git github.com/go-enry/go-enry
 	//    name: go-enry
 	//    host: github.com
-	//    remote: git@github.com/go-enry/go-enry.git
+	//    remote: git@github.com:go-enry/go-enry.git
 	//    commit-ish: v2.4.1
 }
