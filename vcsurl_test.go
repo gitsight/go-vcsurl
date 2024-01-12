@@ -152,6 +152,42 @@ func TestParse_GitlabSubGroup(t *testing.T) {
 	}
 }
 
+func TestParse_AzureLegacy(t *testing.T) {
+	urls := []string{
+		"org@vs-ssh.visualstudio.com:v3/org/Project/RepoName",
+	}
+
+	for _, url := range urls {
+		t.Run(url, func(t *testing.T) {
+			vcs, err := vcsurl.Parse(url)
+			require.NoError(t, err)
+			require.Equal(t, vcs.Kind, vcsurl.Git)
+			require.Equal(t, vcs.Host, vcsurl.AzureLegacy)
+			require.Equal(t, vcs.Username, "org/Project")
+			require.Equal(t, vcs.Name, "RepoName")
+			require.Equal(t, vcs.FullName, "org/Project/RepoName")
+		})
+	}
+}
+
+func TestParse_Azure(t *testing.T) {
+	urls := []string{
+		"git@ssh.dev.azure.com:v3/org/Project/RepoName",
+	}
+
+	for _, url := range urls {
+		t.Run(url, func(t *testing.T) {
+			vcs, err := vcsurl.Parse(url)
+			require.NoError(t, err)
+			require.Equal(t, vcs.Kind, vcsurl.Git)
+			require.Equal(t, vcs.Host, vcsurl.Azure)
+			require.Equal(t, vcs.Username, "org/Project")
+			require.Equal(t, vcs.Name, "RepoName")
+			require.Equal(t, vcs.FullName, "org/Project/RepoName")
+		})
+	}
+}
+
 func TestParse_GitlabCommittish(t *testing.T) {
 	urls := []string{
 		"https://gitlab.com/foo/qux/bar/-/commit/baz",

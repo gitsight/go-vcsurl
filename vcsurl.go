@@ -24,9 +24,11 @@ type Host string
 
 // Supported VCS host provider.
 const (
-	GitHub    Host = "github.com"
-	Bitbucket Host = "bitbucket.org"
-	GitLab    Host = "gitlab.com"
+	GitHub      Host = "github.com"
+	Bitbucket   Host = "bitbucket.org"
+	GitLab      Host = "gitlab.com"
+	AzureLegacy Host = "vs-ssh.visualstudio.com"
+	Azure       Host = "ssh.dev.azure.com"
 
 	gitHubAPI Host = "api.github.com"
 )
@@ -49,16 +51,20 @@ const (
 )
 
 var knownHosts = map[Host]struct{}{
-	GitHub:    struct{}{},
-	GitLab:    struct{}{},
-	Bitbucket: struct{}{},
+	GitHub:      struct{}{},
+	GitLab:      struct{}{},
+	Bitbucket:   struct{}{},
+	AzureLegacy: struct{}{},
+	Azure:       struct{}{},
 }
 
 var kindByHost = map[Host]Kind{
-	GitHub:    Git,
-	gitHubAPI: Git,
-	GitLab:    Git,
-	Bitbucket: Git,
+	GitHub:      Git,
+	gitHubAPI:   Git,
+	GitLab:      Git,
+	Bitbucket:   Git,
+	AzureLegacy: Git,
+	Azure:       Git,
 }
 
 // VCS describes a VCS repository.
@@ -84,7 +90,7 @@ type VCS struct {
 
 var (
 	removeDotGit    = regexp.MustCompile(`\.git$`)
-	gitPreprocessRE = regexp.MustCompile("^git@([a-zA-Z0-9-_\\.]+)\\:(.*)$")
+	gitPreprocessRE = regexp.MustCompile("^[a-zA-Z0-9-_]+@([a-zA-Z0-9-_\\.]+)\\:(.*)$")
 )
 
 // Parse parses a string that resembles a VCS repository URL. See TestParse for
@@ -123,6 +129,8 @@ func Parse(raw string) (*VCS, error) {
 		err = vcs.parseBitbucket(parsedURL)
 	case GitLab:
 		err = vcs.parseGitlab(parsedURL)
+	case Azure, AzureLegacy:
+		err = vcs.parseAzure(parsedURL)
 	default:
 		err = vcs.parseDefault(parsedURL)
 	}
@@ -213,6 +221,34 @@ func (v *VCS) parseGitlab(url *url.URL) error {
 	}
 
 	v.Username = strings.Join(parts[1:last-1], "/")
+	v.Name = removeDotGit.ReplaceAllLiteralString(parts[last-1], "")
+	v.FullName = v.Username + "/" + v.Name
+
+	if len(parts) >= (last + 2) {
+		object := parts[last+1]
+		if object == "tags" || object == "commit" || object == "tree" {
+			v.Committish = strings.Join(parts[last+2:], "/")
+		}
+	}
+
+	return nil
+}
+
+func (v *VCS) parseAzure(url *url.URL) error {
+	parts := strings.Split(url.Path, "/")
+	if len(parts) < 4 {
+		return ErrUnknownURL
+	}
+
+	var last int
+	for _, p := range parts {
+		if p == "-" {
+			break
+		}
+		last++
+	}
+
+	v.Username = strings.Join(parts[2:last-1], "/")
 	v.Name = removeDotGit.ReplaceAllLiteralString(parts[last-1], "")
 	v.FullName = v.Username + "/" + v.Name
 
